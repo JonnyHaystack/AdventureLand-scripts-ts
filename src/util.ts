@@ -1,9 +1,9 @@
 import { DEBUG } from "./constants";
 import { Vector } from "./types";
 
-function debug_log(message: string, color?: string | undefined) {
+function debug_log(message: string) {
     if (DEBUG) {
-        log(message, color);
+        console.log(message);
     }
 }
 

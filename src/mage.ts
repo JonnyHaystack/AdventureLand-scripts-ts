@@ -1,18 +1,26 @@
 import { rangedAttackBasic, regenStuff } from "./actions";
-import { getState } from "./state";
+import { StateKey, getState } from "./state";
+import { upgradeItemTask } from "./workflows/upgradeItem";
 
-function main() {
-    setInterval(() => {
+let mainLoopTimer: NodeJS.Timeout;
+
+function startMainLoop() {
+    mainLoopTimer = setInterval(() => {
         regenStuff();
         loot();
 
-        if (!getState().attackMode || character.rip || is_moving(character)) {
+        if (!getState(StateKey.ATTACK_MODE) || character.rip || is_moving(character)) {
             set_message("Attack: off");
-            return;
+        } else {
+            rangedAttackBasic();
         }
 
-        rangedAttackBasic();
+        upgradeItemTask();
     }, 1000 / 4); // Loops every 1/4 seconds.
 }
 
-export { main };
+function stopMainLoop() {
+    clearInterval(mainLoopTimer);
+}
+
+export { startMainLoop, stopMainLoop };

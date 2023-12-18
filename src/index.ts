@@ -1,11 +1,11 @@
 import { startPartyAutoAccepter } from "./common/autoAcceptParty";
 import { startFriendMessageLogger } from "./common/logFriendMessage";
-import * as eventHandlers from "./eventHandlers";
-import * as keybinds from "./keybinds";
+import { startPublishers } from "./eventHandlers";
+import { setupDefaultKeybinds } from "./keybinds";
 import * as mage from "./mage";
 
-keybinds.setupDefaults();
-eventHandlers.startPublishers();
+setupDefaultKeybinds();
+startPublishers();
 startPartyAutoAccepter();
 startFriendMessageLogger();
-mage.main();
+mage.startMainLoop();

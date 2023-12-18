@@ -1,5 +1,5 @@
 import { MapClickHandler, attachMapClickHandler, detachMapClickHandler } from "./eventHandlers";
-import { getState } from "./state";
+import { StateKey, getState, setState } from "./state";
 import { Vector } from "./types";
 import { debug_log } from "./util";
 
@@ -15,6 +15,8 @@ function renderWaypoints(waypoints: WaypointsType) {
     clear_drawings();
     for (let i = 0; i < waypoints.length; i++) {
         const waypoint = waypoints[i];
+
+        // First line is drawn from the character to the first waypoint.
         if (i === 0) {
             draw_line(character.x, character.y, waypoint.x, waypoint.y, LINE_THICKNESS);
         } else {
@@ -32,7 +34,7 @@ function renderWaypoints(waypoints: WaypointsType) {
 }
 
 const waypointClickHandler: MapClickHandler = (x, y) => {
-    debug_log(`getState().waypointMode: ${getState().waypointMode}`);
+    debug_log(`getState(StateKey.WAYPOINT_MODE): ${getState(StateKey.WAYPOINT_MODE)}`);
     debug_log(`Adding waypoint: ${x}, ${y}`);
     currentWaypoints.push({ x, y });
     renderWaypoints(currentWaypoints);
@@ -41,20 +43,20 @@ const waypointClickHandler: MapClickHandler = (x, y) => {
 };
 
 function startWaypointEditor() {
-    getState().waypointMode = true;
+    setState(StateKey.WAYPOINT_MODE, true);
     currentWaypoints = [];
     attachMapClickHandler(waypointClickHandler);
 }
 
 function stopWaypointEditor() {
-    getState().waypointMode = false;
+    setState(StateKey.WAYPOINT_MODE, false);
     detachMapClickHandler(waypointClickHandler);
     clear_drawings();
     return currentWaypoints;
 }
 
 function undoLastWaypoint() {
-    if (!getState().waypointMode) {
+    if (!getState(StateKey.WAYPOINT_MODE)) {
         log("Cannot undo waypoint - editor is not active!");
         return;
     }

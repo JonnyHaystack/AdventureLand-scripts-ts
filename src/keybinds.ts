@@ -1,13 +1,20 @@
 import { toggleAttack, toggleWaypointEditor } from "./actions";
 import { undoLastWaypoint } from "./waypoints";
+import { startUpgradeItem, stopUpgradeItem } from "./workflows/upgradeItem";
 
-function setupDefaults() {
+function setupDefaultKeybinds() {
     reset_mappings();
-    parent.codeActions = { toggleAttack, toggleWaypointEditor, undoLastWaypoint };
-    map_key("A", "snippet", "parent.codeActions.toggleAttack()");
-    map_key("W", "snippet", "parent.codeActions.toggleWaypointEditor()");
-    map_key("X", "snippet", "parent.codeActions.undoLastWaypoint()");
+    (parent as any).commands = {
+        toggleAttack,
+        toggleWaypointEditor,
+        undoLastWaypoint,
+        startUpgradeItem,
+        stopUpgradeItem,
+    };
+    map_key("A", "snippet", "parent.commands.toggleAttack()");
+    map_key("W", "snippet", "parent.commands.toggleWaypointEditor()");
+    map_key("X", "snippet", "parent.commands.undoLastWaypoint()");
     // map_key("'", "toggle_run_code");
 }
 
-export { setupDefaults };
+export { setupDefaultKeybinds };

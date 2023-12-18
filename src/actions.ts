@@ -1,4 +1,4 @@
-import { getState } from "./state";
+import { StateKey, getState, setState } from "./state";
 import { debug_log } from "./util";
 import { startWaypointEditor, stopWaypointEditor } from "./waypoints";
 
@@ -7,17 +7,17 @@ let last_potion = new Date(0);
 
 function runAway() {
     // TODO: Improve this a lot
-    getState().attackMode = false;
+    setState(StateKey.ATTACK_MODE, false);
     smart_move("bean");
 }
 
 function toggleAttack() {
-    getState().attackMode = !getState().attackMode;
-    log(`Attack mode ${getState().attackMode ? "en" : "dis"}abled!`);
+    setState(StateKey.ATTACK_MODE, !getState(StateKey.ATTACK_MODE));
+    log(`Attack mode ${getState(StateKey.ATTACK_MODE) ? "en" : "dis"}abled!`);
 }
 
 function toggleWaypointEditor() {
-    if (!getState().waypointMode) {
+    if (!getState(StateKey.WAYPOINT_MODE)) {
         startWaypointEditor();
         log("Waypoint editor started!");
         return;
@@ -26,7 +26,7 @@ function toggleWaypointEditor() {
     // Save new waypoints if any were created.
     const newWaypoints = stopWaypointEditor();
     if (newWaypoints.length > 0) {
-        getState().waypoints = newWaypoints;
+        setState(StateKey.WAYPOINTS, newWaypoints);
         log(`Saved ${newWaypoints.length} new waypoints!`);
         return;
     }

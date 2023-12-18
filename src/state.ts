@@ -1,40 +1,31 @@
-import { Vector } from "./types";
-
 enum StateKey {
-    ATTACK_MODE,
-    WAYPOINT_MODE,
-    WAYPOINTS,
+    ATTACK_MODE = "attackMode",
+    WAYPOINT_MODE = "waypointMode",
+    WAYPOINTS = "waypoints",
 }
 
-interface State {
-    attackMode: boolean;
-    waypointMode: boolean;
-    waypoints: Vector[];
-}
-
-// type State = {
-//     [key in StateKey]: any;
-// };
+type State = Record<StateKey, any>;
 
 const defaultState: State = {
-    attackMode: false,
-    waypointMode: false,
-    waypoints: [],
+    [StateKey.ATTACK_MODE]: false,
+    [StateKey.WAYPOINT_MODE]: false,
+    [StateKey.WAYPOINTS]: [],
 };
 
 let state: State;
 
-function getState() {
+function getState(key: StateKey) {
     if (!state) {
         state = defaultState;
     }
-    return state;
+    return state[key];
 }
 
-// function setState(key: StateKey, value: any) {
-//     if (Object.keys(state).includes(key)) {
-//         state[key] = value;
-//     }
-// }
+function setState(key: StateKey, value: any) {
+    if (!state) {
+        state = defaultState;
+    }
+    state[key] = value;
+}
 
-export { StateKey, getState };
+export { StateKey, getState, setState };
