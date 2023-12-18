@@ -1,9 +1,9 @@
-import { ranged_attack_basic, regen_stuff } from "./actions";
+import { rangedAttackBasic, regenStuff } from "./actions";
 import { getState } from "./state";
 
 function main() {
     setInterval(() => {
-        regen_stuff();
+        regenStuff();
         loot();
 
         if (!getState().attackMode || character.rip || is_moving(character)) {
@@ -11,7 +11,7 @@ function main() {
             return;
         }
 
-        ranged_attack_basic();
+        rangedAttackBasic();
     }, 1000 / 4); // Loops every 1/4 seconds.
 }
 

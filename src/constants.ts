@@ -1,5 +1,5 @@
 const DEBUG = true;
-const myPlayerId = "4795072004751360";
-const partyAllowList = ["Dengar", "Cadet", "Shelfy", "Kata", "Kano"];
+const MY_PLAYER_ID = "4795072004751360";
+const FRIENDS_LIST = ["Dengar", "Cadet", "Shelfy", "Kata", "Kano"];
 
-export { DEBUG, myPlayerId, partyAllowList };
+export { DEBUG, MY_PLAYER_ID, FRIENDS_LIST };

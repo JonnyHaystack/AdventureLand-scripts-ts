@@ -1,48 +1,97 @@
-import { debug_log } from "./util";
-import { partyAllowList } from "./constants";
-import { getState } from "./state";
+type MapClickHandler = (x: number, y: number) => boolean;
+type PartyInviteHandler = (name: string) => void;
+type PartyRequestHandler = (name: string) => void;
+type CodeMessageHandler = (message: any) => void;
+type EventHandler = MapClickHandler | PartyInviteHandler | PartyRequestHandler | CodeMessageHandler;
 
-function setupDefaults() {
+const mapClickHandlers: MapClickHandler[] = [];
+const partyInviteHandlers: PartyInviteHandler[] = [];
+const partyRequestHandlers: PartyRequestHandler[] = [];
+const codeMessageHandlers: CodeMessageHandler[] = [];
+
+function attachHandler(handlers: EventHandler[], handler: EventHandler) {
+    if (handlers.includes(handler)) {
+        return false;
+    }
+    handlers.push(handler);
+    return true;
+}
+
+function detachHandler(handlers: EventHandler[], handler: EventHandler) {
+    const handlerIndex = handlers.indexOf(handler);
+    if (handlerIndex < 0) {
+        return false;
+    }
+    handlers.splice(handlerIndex, 1);
+    return true;
+}
+
+function attachMapClickHandler(handler: MapClickHandler) {
+    return attachHandler(mapClickHandlers, handler);
+}
+
+function detachMapClickHandler(handler: MapClickHandler) {
+    return detachHandler(mapClickHandlers, handler);
+}
+
+function attachPartyInviteHandler(handler: PartyInviteHandler) {
+    return attachHandler(partyInviteHandlers, handler);
+}
+
+function detachPartyInviteHandler(handler: PartyInviteHandler) {
+    return detachHandler(partyInviteHandlers, handler);
+}
+
+function attachPartyRequestHandler(handler: PartyRequestHandler) {
+    return attachHandler(partyRequestHandlers, handler);
+}
+
+function detachPartyRequestHandler(handler: PartyRequestHandler) {
+    return detachHandler(partyRequestHandlers, handler);
+}
+
+function attachCodeMessageHandler(handler: CodeMessageHandler) {
+    return attachHandler(codeMessageHandlers, handler);
+}
+
+function detachCodeMessageHandler(handler: CodeMessageHandler) {
+    return detachHandler(codeMessageHandlers, handler);
+}
+
+function startPublishers() {
     on_party_invite = (name) => {
-        if (partyAllowList.includes(name)) {
-            accept_party_invite(name);
-        }
-        log(`Received party invite from ${name}, and accepted it!`);
+        partyRequestHandlers.forEach((handler) => handler(name));
     };
 
     on_party_request = (name) => {
-        if (partyAllowList.includes(name)) {
-            accept_party_request(name);
-        }
-        log(`Received party request from ${name}, and accepted it!`);
+        partyRequestHandlers.forEach((handler) => handler(name));
     };
 
     on_map_click = (x, y) => {
-        debug_log(`getState().waypointMode: ${getState().waypointMode}`);
-        if (!getState().waypointMode) {
-            return false;
+        let overrideDefaultMove = false;
+        for (const handler of mapClickHandlers) {
+            overrideDefaultMove = overrideDefaultMove || handler(x, y);
         }
-
-        debug_log(`Adding waypoint: ${x}, ${y}`);
-        if (getState().waypoints.length > 0) {
-            const last_waypoint = getState().waypoints[getState().waypoints.length - 1];
-            draw_line(last_waypoint.x, last_waypoint.y, x, y, 1);
-        } else {
-            draw_line(character.x, character.y, x, y, 1);
-        }
-        getState().waypoints.push({ x, y });
-
-        return true;
+        return overrideDefaultMove;
     };
 
-    // On every character, implement a messaging logic like this:
-    character.on("cm", (m: any) => {
-        // send_cm();
-        safe_log(m);
-        if (m.name === "Dengar") {
-            safe_log(m);
-        }
+    character.on("cm", (message: any) => {
+        codeMessageHandlers.forEach((handler) => handler(message));
     });
 }
 
-export { setupDefaults };
+export {
+    MapClickHandler,
+    PartyInviteHandler,
+    PartyRequestHandler,
+    CodeMessageHandler,
+    startPublishers,
+    attachMapClickHandler,
+    detachMapClickHandler,
+    attachPartyInviteHandler,
+    detachPartyInviteHandler,
+    attachPartyRequestHandler,
+    detachPartyRequestHandler,
+    attachCodeMessageHandler,
+    detachCodeMessageHandler,
+};

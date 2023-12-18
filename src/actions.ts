@@ -1,27 +1,39 @@
 import { getState } from "./state";
 import { debug_log } from "./util";
+import { startWaypointEditor, stopWaypointEditor } from "./waypoints";
 
 const safeties = true;
 let last_potion = new Date(0);
 
-function run_away() {
+function runAway() {
     // TODO: Improve this a lot
     getState().attackMode = false;
     smart_move("bean");
 }
 
-function toggle_attack() {
+function toggleAttack() {
     getState().attackMode = !getState().attackMode;
     log(`Attack mode ${getState().attackMode ? "en" : "dis"}abled!`);
 }
 
-function toggle_waypoint_edit() {
-    getState().waypointMode = !getState().waypointMode;
-    log(`Waypoint editor ${getState().waypointMode ? "en" : "dis"}abled!`);
-    clear_drawings();
+function toggleWaypointEditor() {
+    if (!getState().waypointMode) {
+        startWaypointEditor();
+        log("Waypoint editor started!");
+        return;
+    }
+
+    // Save new waypoints if any were created.
+    const newWaypoints = stopWaypointEditor();
+    if (newWaypoints.length > 0) {
+        getState().waypoints = newWaypoints;
+        log(`Saved ${newWaypoints.length} new waypoints!`);
+        return;
+    }
+    log("No new waypoints to save.");
 }
 
-function regen_stuff() {
+function regenStuff() {
     if (safeties && mssince(last_potion) < Math.min(200, character.ping * 3)) {
         return resolving_promise({
             reason: "safeties",
@@ -31,8 +43,8 @@ function regen_stuff() {
     }
     let used = true;
 
-    const cooldown_abilities = ["use_hp", "regen_hp", "use_mp", "regen_mp"];
-    for (const ability of cooldown_abilities) {
+    const cooldownAbilities = ["use_hp", "regen_hp", "use_mp", "regen_mp"];
+    for (const ability of cooldownAbilities) {
         if (is_on_cooldown(ability)) {
             return resolving_promise({ success: false, reason: "cooldown" });
         }
@@ -53,7 +65,7 @@ function regen_stuff() {
     }
     if (character.hp / character.max_hp < 0.2) {
         debug_log("use_skill('use_hp')");
-        return run_away();
+        return runAway();
         // return use_skill("use_hp");
     }
     used = false;
@@ -68,7 +80,7 @@ function regen_stuff() {
     }
 }
 
-function ranged_attack_basic() {
+function rangedAttackBasic() {
     let target = get_targeted_monster();
     if (!target) {
         target = get_nearest_monster({ min_xp: 100, max_att: 120 });
@@ -88,24 +100,24 @@ function ranged_attack_basic() {
             character.y + (target.y - character.y) / 2,
         );
     } else if (can_attack(target) && !is_on_cooldown("attack")) {
-        const distance_to_target = simple_distance(
+        const distanceToTarget = simple_distance(
             { x: character.x, y: character.y },
             { x: target.x, y: target.y },
         );
 
-        const safe_distance = target.range + 20;
-        if (distance_to_target < safe_distance) {
-            debug_log(`distance_to_target=${Math.round(distance_to_target)}`);
+        const safeDistance = target.range + 20;
+        if (distanceToTarget < safeDistance) {
+            debug_log(`distanceToTarget=${Math.round(distanceToTarget)}`);
             debug_log(
                 `Vector: ${Math.round(character.x - target.x)}, ${Math.round(
                     character.y - target.y,
                 )}`,
             );
-            const safe_distance_mult = safe_distance / distance_to_target;
-            debug_log(`safe_distance_mult=${safe_distance_mult.toFixed(3)}`);
+            const safeDistanceMult = safeDistance / distanceToTarget;
+            debug_log(`safeDistanceMult=${safeDistanceMult.toFixed(3)}`);
             move(
-                character.x + (character.x - target.x) * safe_distance_mult,
-                character.y + (character.y - target.y) * safe_distance_mult,
+                character.x + (character.x - target.x) * safeDistanceMult,
+                character.y + (character.y - target.y) * safeDistanceMult,
             );
         }
 
@@ -114,4 +126,4 @@ function ranged_attack_basic() {
     }
 }
 
-export { run_away, toggle_attack, toggle_waypoint_edit, regen_stuff, ranged_attack_basic };
+export { runAway, toggleAttack, toggleWaypointEditor, regenStuff, rangedAttackBasic };
