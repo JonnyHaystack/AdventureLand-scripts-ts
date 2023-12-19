@@ -139,42 +139,38 @@ async function upgradeItemTask() {
         return;
     }
 
-    const shouldRefill = inventoryQuantity(itemToUpgrade) < 1 || inventoryQuantity(scrollToUse) < 1;
+    const currentItemQuantity = inventoryQuantity(itemToUpgrade);
+    const currentScrollQuantity = inventoryQuantity(scrollToUse);
+    const shouldRefill = currentItemQuantity < 1 || currentScrollQuantity < 1;
 
     if (shouldRefill) {
         log(
-            `Refilling items: itemQuantity: ${inventoryQuantity(
-                itemToUpgrade,
-            )}, scrollQuantity: ${inventoryQuantity(scrollToUse)}`,
+            `Refilling items: current itemQuantity: ${currentItemQuantity}, current ` +
+                `scrollQuantity: ${currentScrollQuantity}`,
         );
-        let spareSlotsForItems = freeInventorySlots() - 1;
+        let spareSlotsForItems = freeInventorySlots() - Math.min(1, inventoryQuantity(scrollToUse));
 
         // If we have no scrolls currently, make sure we leave a free slot for scrolls.
         if (inventoryQuantity(scrollToUse) < 1) {
             spareSlotsForItems--;
         }
 
-        const scrollsPerItem = upgradeTargetLevel;
-
         const remainingBudget = upgradeBudget - totalSpent;
 
-        let itemPurchaseQuantity = maxPurchaseQuantityWithinBudget(
-            itemToUpgrade,
-            scrollToUse,
-            scrollsPerItem,
-            remainingBudget,
-        );
+        let itemPurchaseQuantity = 0;
+        if (currentItemQuantity < 1) {
+            itemPurchaseQuantity = 1;
+        }
 
-        const stackable = (G.items[itemToUpgrade]?.s ?? 1) > 1;
+        let scrollPurchaseQuantity = 0;
+        if (currentScrollQuantity < 1) {
+            scrollPurchaseQuantity = 1;
+        }
 
         // If non-stackable, limit the purchase amount to the number of free slots.
+        const stackable = (G.items[itemToUpgrade]?.s ?? 1) > 1;
         if (!stackable) {
             itemPurchaseQuantity = Math.min(itemPurchaseQuantity, spareSlotsForItems);
-        }
-        const scrollPurchaseQuantity = itemPurchaseQuantity * scrollsPerItem;
-
-        if (itemPurchaseQuantity < 1 && scrollPurchaseQuantity < 1) {
-            return;
         }
 
         const refillCost =
@@ -183,12 +179,11 @@ async function upgradeItemTask() {
 
         if (refillCost > remainingBudget) {
             log(
-                `Refill cost (${refillCost}) is unexpectedly higher than budget (${remainingBudget})!`,
+                `Refill cost (${refillCost}) is higher than remaining budget (${remainingBudget})!`,
             );
             stopUpgradeItem();
             return;
         }
-
         if (refillCost > character.gold) {
             log(`Refill cost ${refillCost} is greater than current gold ${character.gold}`);
             stopUpgradeItem();
