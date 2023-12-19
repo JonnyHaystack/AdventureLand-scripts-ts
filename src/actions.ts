@@ -1,3 +1,4 @@
+import { debug } from "console";
 import { startFollowing, stopFollowing } from "./common/follow";
 import { StateKey, getState, setState } from "./state";
 import { debug_log } from "./util";
@@ -92,48 +93,52 @@ function regenStuff() {
 }
 
 async function rangedAttackBasic() {
-    debug_log("rangedAttackBasic()");
     let target = get_targeted_monster();
     if (!target) {
+        debug_log("Searching for nearest monster");
         target = get_nearest_monster({ min_xp: 100, max_att: 120 });
 
         if (target) {
+            debug_log(`Target acquired: ${target.name}`);
             change_target(target);
         } else {
+            debug_log("No monsters found");
             set_message("No Monsters");
             return;
         }
     }
 
     if (!is_in_range(target)) {
-        // Walk half the distance
+        // Walk some of the distance.
+        const distanceStepFactor = 0.1;
+        debug_log(`Out of range, walking ${distanceStepFactor * 100}% of the distance to target`);
         move(
-            character.x + (target.x - character.x) / 2,
-            character.y + (target.y - character.y) / 2,
+            character.x + (target.x - character.x) * distanceStepFactor,
+            character.y + (target.y - character.y) * distanceStepFactor,
         );
-    } else if (can_attack(target) && !is_on_cooldown("attack")) {
-        const distanceToTarget = simple_distance(
-            { x: character.x, y: character.y },
-            { x: target.x, y: target.y },
+        return;
+    }
+    const distanceToTarget = simple_distance(
+        { x: character.x, y: character.y },
+        { x: target.x, y: target.y },
+    );
+
+    const idealDistance = character.range * 0.9;
+    // const idealDistance = target.range + 20;
+    if (distanceToTarget < idealDistance) {
+        debug_log(`distanceToTarget=${Math.round(distanceToTarget)}`);
+        debug_log(
+            `Vector: ${Math.round(character.x - target.x)}, ${Math.round(character.y - target.y)}`,
         );
+        const idealDistanceMult = idealDistance / distanceToTarget;
+        debug_log(`idealDistanceMult=${idealDistanceMult.toFixed(3)}`);
+        await move(
+            character.x + (character.x - target.x) * idealDistanceMult,
+            character.y + (character.y - target.y) * idealDistanceMult,
+        );
+    }
 
-        // const idealDistance = character.range * 0.9;
-        const idealDistance = target.range + 20;
-        if (distanceToTarget < idealDistance) {
-            debug_log(`distanceToTarget=${Math.round(distanceToTarget)}`);
-            debug_log(
-                `Vector: ${Math.round(character.x - target.x)}, ${Math.round(
-                    character.y - target.y,
-                )}`,
-            );
-            const idealDistanceMult = idealDistance / distanceToTarget;
-            debug_log(`idealDistanceMult=${idealDistanceMult.toFixed(3)}`);
-            await move(
-                character.x + (character.x - target.x) * idealDistanceMult,
-                character.y + (character.y - target.y) * idealDistanceMult,
-            );
-        }
-
+    if (can_attack(target) && !is_on_cooldown("attack")) {
         set_message("Attacking");
         attack(target);
     }
