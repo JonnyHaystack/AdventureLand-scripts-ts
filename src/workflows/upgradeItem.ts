@@ -136,6 +136,7 @@ async function upgradeItemTask() {
     if (currentHighestItemLevel(itemToUpgrade) >= upgradeTargetLevel) {
         log(`We got ourselves a level ${upgradeTargetLevel} ${itemToUpgrade}!`);
         stopUpgradeItem();
+        return;
     }
 
     const shouldRefill = inventoryQuantity(itemToUpgrade) < 1 || inventoryQuantity(scrollToUse) < 1;
@@ -153,7 +154,7 @@ async function upgradeItemTask() {
             spareSlotsForItems--;
         }
 
-        const scrollsPerItem = upgradeTargetLevel - 1;
+        const scrollsPerItem = upgradeTargetLevel;
 
         const remainingBudget = upgradeBudget - totalSpent;
 
@@ -185,11 +186,13 @@ async function upgradeItemTask() {
                 `Refill cost (${refillCost}) is unexpectedly higher than budget (${remainingBudget})!`,
             );
             stopUpgradeItem();
+            return;
         }
 
         if (refillCost > character.gold) {
             log(`Refill cost ${refillCost} is greater than current gold ${character.gold}`);
             stopUpgradeItem();
+            return;
         }
 
         debug_log(

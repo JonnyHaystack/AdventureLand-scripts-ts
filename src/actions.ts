@@ -1,3 +1,4 @@
+import { startFollowing, stopFollowing } from "./common/follow";
 import { StateKey, getState, setState } from "./state";
 import { debug_log } from "./util";
 import { startWaypointEditor, stopWaypointEditor } from "./waypoints";
@@ -8,12 +9,22 @@ let last_potion = new Date(0);
 function runAway() {
     // TODO: Improve this a lot
     setState(StateKey.ATTACK_MODE, false);
+    log(`Attack mode disabled!`);
     smart_move("bean");
 }
 
 function toggleAttack() {
     setState(StateKey.ATTACK_MODE, !getState(StateKey.ATTACK_MODE));
     log(`Attack mode ${getState(StateKey.ATTACK_MODE) ? "en" : "dis"}abled!`);
+}
+
+function toggleFollow() {
+    const following = getState(StateKey.FOLLOWING);
+    if (following == null) {
+        startFollowing(get_target());
+    } else {
+        stopFollowing();
+    }
 }
 
 function toggleWaypointEditor() {
@@ -50,6 +61,15 @@ function regenStuff() {
         }
     }
 
+    if (character.max_hp - character.hp >= 50) {
+        debug_log("use_skill('regen_hp')");
+        return use_skill("regen_hp");
+    }
+    if (character.hp / character.max_hp < 0.3) {
+        debug_log("runAway()");
+        return runAway();
+        // return use_skill("use_hp");
+    }
     if (character.mp / character.max_mp < 0.2) {
         debug_log("use_skill('use_mp')");
         return use_skill("use_mp");
@@ -58,15 +78,6 @@ function regenStuff() {
         debug_log(`is_on_cooldown('regen_mp'): ${is_on_cooldown("regen_mp")}`);
         debug_log("use_skill('regen_mp')");
         return use_skill("regen_mp");
-    }
-    if (character.max_hp - character.hp >= 50) {
-        debug_log("use_skill('regen_hp')");
-        return use_skill("regen_hp");
-    }
-    if (character.hp / character.max_hp < 0.2) {
-        debug_log("use_skill('use_hp')");
-        return runAway();
-        // return use_skill("use_hp");
     }
     used = false;
     if (used) {
@@ -80,7 +91,8 @@ function regenStuff() {
     }
 }
 
-function rangedAttackBasic() {
+async function rangedAttackBasic() {
+    debug_log("rangedAttackBasic()");
     let target = get_targeted_monster();
     if (!target) {
         target = get_nearest_monster({ min_xp: 100, max_att: 120 });
@@ -105,19 +117,20 @@ function rangedAttackBasic() {
             { x: target.x, y: target.y },
         );
 
-        const safeDistance = target.range + 20;
-        if (distanceToTarget < safeDistance) {
+        // const idealDistance = character.range * 0.9;
+        const idealDistance = target.range + 20;
+        if (distanceToTarget < idealDistance) {
             debug_log(`distanceToTarget=${Math.round(distanceToTarget)}`);
             debug_log(
                 `Vector: ${Math.round(character.x - target.x)}, ${Math.round(
                     character.y - target.y,
                 )}`,
             );
-            const safeDistanceMult = safeDistance / distanceToTarget;
-            debug_log(`safeDistanceMult=${safeDistanceMult.toFixed(3)}`);
-            move(
-                character.x + (character.x - target.x) * safeDistanceMult,
-                character.y + (character.y - target.y) * safeDistanceMult,
+            const idealDistanceMult = idealDistance / distanceToTarget;
+            debug_log(`idealDistanceMult=${idealDistanceMult.toFixed(3)}`);
+            await move(
+                character.x + (character.x - target.x) * idealDistanceMult,
+                character.y + (character.y - target.y) * idealDistanceMult,
             );
         }
 
@@ -126,4 +139,4 @@ function rangedAttackBasic() {
     }
 }
 
-export { runAway, toggleAttack, toggleWaypointEditor, regenStuff, rangedAttackBasic };
+export { runAway, toggleAttack, toggleFollow, toggleWaypointEditor, regenStuff, rangedAttackBasic };
