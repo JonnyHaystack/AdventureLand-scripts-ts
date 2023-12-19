@@ -123,8 +123,12 @@ async function rangedAttackBasic() {
         { x: target.x, y: target.y },
     );
 
-    const idealDistance = character.range * 0.9;
-    // const idealDistance = target.range + 20;
+    if (can_attack(target) && !is_on_cooldown("attack")) {
+        set_message("Attacking");
+        attack(target);
+    }
+
+    const idealDistance = Math.min(character.range * 0.9, target.range + 20);
     if (distanceToTarget < idealDistance) {
         debug_log(`distanceToTarget=${Math.round(distanceToTarget)}`);
         debug_log(
@@ -136,11 +140,6 @@ async function rangedAttackBasic() {
             character.x + (character.x - target.x) * idealDistanceMult,
             character.y + (character.y - target.y) * idealDistanceMult,
         );
-    }
-
-    if (can_attack(target) && !is_on_cooldown("attack")) {
-        set_message("Attacking");
-        attack(target);
     }
 }
 
