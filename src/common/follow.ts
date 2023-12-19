@@ -20,7 +20,7 @@ function stopFollowing() {
     setState(StateKey.FOLLOWING, null);
 }
 
-function followTask() {
+async function followTask() {
     const following: Entity | null = getState(StateKey.FOLLOWING);
     if (following != null) {
         const distanceFromFollowee = simple_distance(
@@ -30,7 +30,7 @@ function followTask() {
         if (distanceFromFollowee > FOLLOW_DISTANCE) {
             debug_log(`distanceFromFollowee: ${distanceFromFollowee}`);
             debug_log(`smart_moving to ${following.x}, ${following.y}`);
-            smart_move(following.x, following.y);
+            await smart_move(following.x, following.y);
         }
     }
 }
