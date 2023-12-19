@@ -8,5 +8,10 @@
         "name": "NixOSbtw",
         "ctype": "paladin",
         "id": "5940321343242240"
+    },
+    {
+        "name": "ArcherBTW",
+        "ctype": "ranger",
+        "id": "5305567119933440"
     }
 ]
