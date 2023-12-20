@@ -1,7 +1,7 @@
 import { debug } from "console";
 import { startFollowing, stopFollowing } from "./common/follow";
 import { StateKey, getState, setState } from "./state";
-import { debug_log } from "./util";
+import { amountICanHeal, amountICanMagicRegen, debug_log } from "./util";
 import { startWaypointEditor, stopWaypointEditor } from "./waypoints";
 
 const safeties = true;
@@ -10,7 +10,7 @@ let last_potion = new Date(0);
 function runAway() {
     // TODO: Improve this a lot
     setState(StateKey.ATTACK_MODE, false);
-    log(`Attack mode disabled!`);
+    log(`Attack mode disabled - running away!`);
     smart_move("bean");
 }
 
@@ -53,50 +53,51 @@ function regenStuff() {
             used: false,
         });
     }
-    let used = true;
 
-    const cooldownAbilities = ["use_hp", "regen_hp", "use_mp", "regen_mp"];
-    for (const ability of cooldownAbilities) {
-        if (is_on_cooldown(ability)) {
-            return resolving_promise({ success: false, reason: "cooldown" });
-        }
+    // const cooldownAbilities = ["use_hp", "regen_hp", "use_mp", "regen_mp"];
+    // for (const ability of cooldownAbilities) {
+    //     if (is_on_cooldown(ability)) {
+    //         return resolving_promise({ success: false, reason: "cooldown" });
+    //     }
+    // }
+    if (is_on_cooldown("use_hp")) {
+        return resolving_promise({ success: false, reason: "cooldown" });
     }
 
-    if (character.max_hp - character.hp >= 50) {
-        debug_log("use_skill('regen_hp')");
-        return use_skill("regen_hp");
+    const healAmount = amountICanHeal();
+    if (character.max_hp - character.hp >= healAmount) {
+        debug_log("use_skill('use_hp')");
+        return use_skill("use_hp");
     }
     if (character.hp / character.max_hp < 0.3) {
         debug_log("runAway()");
         return runAway();
         // return use_skill("use_hp");
     }
-    if (character.mp / character.max_mp < 0.2) {
+    // if (character.mp / character.max_mp < 0.2) {
+    //     debug_log("use_skill('use_mp')");
+    //     return use_skill("use_mp");
+    // }
+
+    const magicRegenAmount = amountICanMagicRegen();
+    if (character.max_mp - character.mp >= magicRegenAmount) {
+        debug_log(`is_on_cooldown('use_mp'): ${is_on_cooldown("use_mp")}`);
         debug_log("use_skill('use_mp')");
         return use_skill("use_mp");
     }
-    if (character.max_mp - character.mp >= 100) {
-        debug_log(`is_on_cooldown('regen_mp'): ${is_on_cooldown("regen_mp")}`);
-        debug_log("use_skill('regen_mp')");
-        return use_skill("regen_mp");
-    }
-    used = false;
-    if (used) {
-        last_potion = new Date();
-    } else {
-        return resolving_promise({
-            reason: "full",
-            success: false,
-            used: false,
-        });
-    }
+
+    return resolving_promise({
+        reason: "full",
+        success: false,
+        used: false,
+    });
 }
 
 async function rangedAttackBasic() {
     let target = get_targeted_monster();
     if (!target) {
         debug_log("Searching for nearest monster");
-        target = get_nearest_monster({ min_xp: 100, max_att: 120 });
+        target = get_nearest_monster({ min_xp: 100, max_att: 26 });
 
         if (target) {
             debug_log(`Target acquired: ${target.name}`);

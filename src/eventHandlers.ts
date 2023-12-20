@@ -1,13 +1,17 @@
+import { CodeMessage } from "./common/codeMessage";
+
 type MapClickHandler = (x: number, y: number) => boolean;
 type PartyInviteHandler = (name: string) => void;
 type PartyRequestHandler = (name: string) => void;
-type CodeMessageHandler = (message: any) => void;
+type CodeMessageHandler = (from: string, message: CodeMessage) => void;
+type MagiportHandler = (from: string) => void;
 type EventHandler = MapClickHandler | PartyInviteHandler | PartyRequestHandler | CodeMessageHandler;
 
 const mapClickHandlers: MapClickHandler[] = [];
 const partyInviteHandlers: PartyInviteHandler[] = [];
 const partyRequestHandlers: PartyRequestHandler[] = [];
 const codeMessageHandlers: CodeMessageHandler[] = [];
+const magiportHandlers: MagiportHandler[] = [];
 
 function attachHandler(handlers: EventHandler[], handler: EventHandler) {
     if (handlers.includes(handler)) {
@@ -58,6 +62,14 @@ function detachCodeMessageHandler(handler: CodeMessageHandler) {
     return detachHandler(codeMessageHandlers, handler);
 }
 
+function attachMagiportHandler(handler: MagiportHandler) {
+    return attachHandler(magiportHandlers, handler);
+}
+
+function detachMagiportHandler(handler: MagiportHandler) {
+    return detachHandler(magiportHandlers, handler);
+}
+
 function startPublishers() {
     on_party_invite = (name) => {
         partyRequestHandlers.forEach((handler) => handler(name));
@@ -75,9 +87,13 @@ function startPublishers() {
         return overrideDefaultMove;
     };
 
-    character.on("cm", (message: any) => {
-        codeMessageHandlers.forEach((handler) => handler(message));
-    });
+    on_cm = (from, data) => {
+        codeMessageHandlers.forEach((handler) => handler(from, data));
+    };
+
+    on_magiport = (from) => {
+        magiportHandlers.forEach((handler) => handler(from));
+    };
 }
 
 export {
@@ -85,6 +101,7 @@ export {
     PartyInviteHandler,
     PartyRequestHandler,
     CodeMessageHandler,
+    MagiportHandler,
     startPublishers,
     attachMapClickHandler,
     detachMapClickHandler,
@@ -94,4 +111,6 @@ export {
     detachPartyRequestHandler,
     attachCodeMessageHandler,
     detachCodeMessageHandler,
+    attachMagiportHandler,
+    detachMagiportHandler,
 };

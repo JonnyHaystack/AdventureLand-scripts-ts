@@ -13,5 +13,10 @@
         "name": "ArcherBTW",
         "ctype": "ranger",
         "id": "5305567119933440"
+    },
+    {
+        "name": "wtbDN",
+        "ctype": "merchant",
+        "id": "6469713106567168"
     }
 ]
