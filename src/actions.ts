@@ -1,11 +1,10 @@
-import { debug } from "console";
 import { startFollowing, stopFollowing } from "./common/follow";
 import { StateKey, getState, setState } from "./state";
 import { amountICanHeal, amountICanMagicRegen, debug_log } from "./util";
 import { startWaypointEditor, stopWaypointEditor } from "./waypoints";
 
 const safeties = true;
-let last_potion = new Date(0);
+// let last_potion = new Date(0);
 
 function runAway() {
     // TODO: Improve this a lot
@@ -46,13 +45,13 @@ function toggleWaypointEditor() {
 }
 
 function regenStuff() {
-    if (safeties && mssince(last_potion) < Math.min(200, character.ping * 3)) {
-        return resolving_promise({
-            reason: "safeties",
-            success: false,
-            used: false,
-        });
-    }
+    // if (safeties && mssince(last_potion) < Math.min(200, character.ping * 3)) {
+    //     return resolving_promise({
+    //         reason: "safeties",
+    //         success: false,
+    //         used: false,
+    //     });
+    // }
 
     // const cooldownAbilities = ["use_hp", "regen_hp", "use_mp", "regen_mp"];
     // for (const ability of cooldownAbilities) {

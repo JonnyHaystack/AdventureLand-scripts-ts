@@ -1,13 +1,13 @@
-import { FRIENDS_LIST } from "../constants";
 import {
     CodeMessageHandler,
     attachCodeMessageHandler,
     detachCodeMessageHandler,
 } from "../eventHandlers";
+import { isFriend } from "../util";
 
-const friendMessageLogger: CodeMessageHandler = (m) => {
-    if (FRIENDS_LIST.includes(m.name)) {
-        safe_log(m);
+const friendMessageLogger: CodeMessageHandler = (from, message) => {
+    if (isFriend(from)) {
+        safe_log(message);
     }
 };
 
