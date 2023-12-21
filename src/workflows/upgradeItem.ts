@@ -1,6 +1,5 @@
-import { ItemInfo } from "typed-adventureland";
-import { ItemKey } from "typed-adventureland/dist/src/types/GTypes";
-import { debug_log } from "../util";
+import { ItemInfo, ItemKey } from "typed-adventureland";
+import { LOG, debug_log } from "../util";
 
 function inventoryQuantity(itemName: ItemKey) {
     return character.items.reduce((quantity: number, currentItem: ItemInfo | null) => {
@@ -17,7 +16,7 @@ function inventoryQuantity(itemName: ItemKey) {
 
 function inventoryItemsIndexed(itemName: ItemKey) {
     return character.items.reduce(
-        (items: { [key: number]: ItemInfo }[], currentItem: ItemInfo | null, index: number) => {
+        (items: { [key: number]: ItemInfo }, currentItem: ItemInfo | null, index: number) => {
             if (currentItem?.name === itemName) {
                 items[index] = currentItem;
             }
@@ -50,8 +49,8 @@ function itemCost(itemName: ItemKey) {
 }
 
 function maxPurchaseQuantityWithinBudget(
-    itemName: string,
-    scrollName: string,
+    itemName: ItemKey,
+    scrollName: ItemKey,
     scrollsPerItem: number,
     budget: number,
 ) {
@@ -111,7 +110,7 @@ function stopUpgradeItem() {
     if (!upgrading) {
         return;
     }
-    log(
+    LOG(
         `Upgrade stopped: ${itemToUpgrade} -> ${upgradeTargetLevel}, budget: ${upgradeBudget}, ` +
             `total spend: ${totalSpent}`,
     );
@@ -139,19 +138,21 @@ async function upgradeItemTask() {
         return;
     }
 
+    // const currentItemQuantity = locate_item(itemToUpgrade) < 0 ? 0 : 1;
+    // const currentScrollQuantity = locate_item(scrollToUse) < 0 ? 0 : 1;
     const currentItemQuantity = inventoryQuantity(itemToUpgrade);
     const currentScrollQuantity = inventoryQuantity(scrollToUse);
     const shouldRefill = currentItemQuantity < 1 || currentScrollQuantity < 1;
 
     if (shouldRefill) {
-        log(
+        debug_log(
             `Refilling items: current itemQuantity: ${currentItemQuantity}, current ` +
                 `scrollQuantity: ${currentScrollQuantity}`,
         );
-        let spareSlotsForItems = freeInventorySlots() - Math.min(1, inventoryQuantity(scrollToUse));
+        let spareSlotsForItems = freeInventorySlots() - Math.min(1, currentScrollQuantity);
 
         // If we have no scrolls currently, make sure we leave a free slot for scrolls.
-        if (inventoryQuantity(scrollToUse) < 1) {
+        if (currentScrollQuantity < 1) {
             spareSlotsForItems--;
         }
 
@@ -207,6 +208,7 @@ async function upgradeItemTask() {
     debug_log("Performing upgrade...");
     const upgradeResult = await upgrade(locate_item(itemToUpgrade), locate_item(scrollToUse));
     debug_log(`Upgrade result: ${upgradeResult}`);
+    await sleep(250);
 }
 
 export { startUpgradeItem, stopUpgradeItem, upgradeItemTask };
