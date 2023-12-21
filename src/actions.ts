@@ -96,7 +96,7 @@ async function rangedAttackBasic() {
     let target = get_targeted_monster();
     if (!target) {
         debug_log("Searching for nearest monster");
-        target = get_nearest_monster({ min_xp: 100, max_att: 26 });
+        target = get_nearest_monster({ min_xp: 100, max_att: 30 });
 
         if (target) {
             debug_log(`Target acquired: ${target.name}`);
