@@ -1,4 +1,4 @@
-import { ItemKey } from "typed-adventureland";
+import { ItemInfo, ItemKey } from "typed-adventureland";
 import { DEBUG, FRIENDS_LIST } from "./constants";
 import { Vector } from "./types";
 
@@ -59,6 +59,37 @@ function amountICanMagicRegen(): number {
     return 100;
 }
 
+function inventoryItems(itemName: ItemKey) {
+    return character.items.filter((item: ItemInfo | null) => item?.name === itemName);
+}
+
+function inventoryItemsIndexed(itemName: ItemKey) {
+    return character.items.reduce(
+        (items: { [key: number]: ItemInfo }, currentItem: ItemInfo | null, index: number) => {
+            if (currentItem?.name === itemName) {
+                items[index] = currentItem;
+            }
+            return items;
+        },
+        {},
+    );
+}
+
+function locateItemWithLowestLevel(itemName: ItemKey) {
+    let lowestLevelSeen = 99;
+    let lowestLevelItemIndex = -1;
+    character.items.forEach((currentItem, currentIndex) => {
+        if (currentItem?.name === itemName) {
+            const currentItemLevel = currentItem?.level ?? lowestLevelSeen;
+            if (currentItemLevel < lowestLevelSeen) {
+                lowestLevelSeen = currentItemLevel;
+                lowestLevelItemIndex = currentIndex;
+            }
+        }
+    });
+    return lowestLevelItemIndex;
+}
+
 function sendItem(to: string, item: ItemKey, quantity: number = 1) {
     const inventoryPosition = locate_item(item);
     if (inventoryPosition < 0) {
@@ -101,6 +132,9 @@ export {
     isFriend,
     amountICanHeal,
     amountICanMagicRegen,
+    inventoryItems,
+    inventoryItemsIndexed,
+    locateItemWithLowestLevel,
     sendItem,
     sendItemViaGui,
 };

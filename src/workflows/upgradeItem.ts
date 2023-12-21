@@ -1,5 +1,5 @@
 import { ItemInfo, ItemKey } from "typed-adventureland";
-import { LOG, debug_log } from "../util";
+import { LOG, debug_log, locateItemWithLowestLevel } from "../util";
 
 function inventoryQuantity(itemName: ItemKey) {
     return character.items.reduce((quantity: number, currentItem: ItemInfo | null) => {
@@ -12,22 +12,6 @@ function inventoryQuantity(itemName: ItemKey) {
         }
         return quantity;
     }, 0);
-}
-
-function inventoryItemsIndexed(itemName: ItemKey) {
-    return character.items.reduce(
-        (items: { [key: number]: ItemInfo }, currentItem: ItemInfo | null, index: number) => {
-            if (currentItem?.name === itemName) {
-                items[index] = currentItem;
-            }
-            return items;
-        },
-        {},
-    );
-}
-
-function inventoryItems(itemName: ItemKey) {
-    return character.items.filter((item: ItemInfo | null) => item?.name === itemName);
 }
 
 function currentHighestItemLevel(itemName: ItemKey) {
@@ -201,12 +185,20 @@ async function upgradeItemTask() {
         if (scrollPurchaseQuantity > 0) {
             await buy_with_gold(scrollToUse, scrollPurchaseQuantity);
         }
+        await sleep(250);
 
         totalSpent += refillCost;
     }
 
+    const itemIndex = locateItemWithLowestLevel(itemToUpgrade);
+    const scrollIndex = locate_item(scrollToUse);
+    if (itemIndex === -1 || scrollIndex === -1) {
+        LOG("Item or scroll not found in inventory");
+        return;
+    }
+
     debug_log("Performing upgrade...");
-    const upgradeResult = await upgrade(locate_item(itemToUpgrade), locate_item(scrollToUse));
+    const upgradeResult = await upgrade(itemIndex, scrollIndex);
     debug_log(`Upgrade result: ${upgradeResult}`);
     await sleep(250);
 }
