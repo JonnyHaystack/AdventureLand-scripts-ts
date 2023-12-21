@@ -72,7 +72,7 @@ function detachMagiportHandler(handler: MagiportHandler) {
 
 function startPublishers() {
     on_party_invite = (name) => {
-        partyRequestHandlers.forEach((handler) => handler(name));
+        partyInviteHandlers.forEach((handler) => handler(name));
     };
 
     on_party_request = (name) => {
