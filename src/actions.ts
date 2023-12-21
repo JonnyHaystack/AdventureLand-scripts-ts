@@ -1,4 +1,5 @@
 import { startFollowing, stopFollowing } from "./common/follow";
+import { TARGET_ENEMY_MAX_ATK, TARGET_ENEMY_MIN_XP } from "./constants";
 import { StateKey, getState, setState } from "./state";
 import { amountICanHeal, amountICanMagicRegen, debug_log } from "./util";
 import { startWaypointEditor, stopWaypointEditor } from "./waypoints";
@@ -96,7 +97,10 @@ async function rangedAttackBasic() {
     let target = get_targeted_monster();
     if (!target) {
         debug_log("Searching for nearest monster");
-        target = get_nearest_monster({ min_xp: 100, max_att: 30 });
+        target = get_nearest_monster({
+            min_xp: TARGET_ENEMY_MIN_XP,
+            max_att: TARGET_ENEMY_MAX_ATK,
+        });
 
         if (target) {
             debug_log(`Target acquired: ${target.name}`);
