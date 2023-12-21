@@ -6,7 +6,7 @@ import {
     detachCodeMessageHandler,
     detachMagiportHandler,
 } from "../eventHandlers";
-import { debug_log, isFriend } from "../util";
+import { LOG, debug_log, isFriend } from "../util";
 import { CodeMessageType } from "./codeMessage";
 
 const autoAcceptMagiport: MagiportHandler = (from: string) => {
@@ -19,6 +19,7 @@ const autoAcceptMagiport: MagiportHandler = (from: string) => {
 };
 
 function requestMagiport(fromPlayer: string) {
+    LOG(`Sending magiport request to ${fromPlayer}`);
     send_cm(fromPlayer, { type: CodeMessageType.MAGIPORT });
 }
 

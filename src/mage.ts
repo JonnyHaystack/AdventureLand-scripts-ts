@@ -4,6 +4,7 @@ import { StateKey, getState } from "./state";
 import { upgradeItemTask } from "./workflows/upgradeItem";
 
 let mainLoopTimer: NodeJS.Timeout;
+let followLoopTimer: NodeJS.Timeout;
 
 function startMainLoop() {
     mainLoopTimer = setInterval(async () => {
@@ -17,12 +18,16 @@ function startMainLoop() {
         }
 
         upgradeItemTask();
-        followTask();
     }, 1000 / 4); // Loops every 1/4 seconds.
+
+    followLoopTimer = setInterval(async () => {
+        followTask();
+    }, 1500);
 }
 
 function stopMainLoop() {
     clearInterval(mainLoopTimer);
+    clearInterval(followLoopTimer);
 }
 
 export { startMainLoop, stopMainLoop };

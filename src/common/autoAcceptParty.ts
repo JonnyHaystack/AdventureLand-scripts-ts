@@ -4,13 +4,13 @@ import {
     detachPartyInviteHandler,
     detachPartyRequestHandler,
 } from "../eventHandlers";
-import { FRIENDS_LIST } from "../constants";
+import { isFriend } from "../util";
 
 function autoAcceptPartyHandler(name: string) {
-    if (FRIENDS_LIST.includes(name)) {
+    if (isFriend(name)) {
         accept_party_invite(name);
+        log(`Received party invite/request from ${name}, and accepted it!`);
     }
-    log(`Received party invite/request from ${name}, and accepted it!`);
 }
 
 function startPartyAutoAccepter() {

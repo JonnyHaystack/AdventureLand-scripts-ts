@@ -30,7 +30,7 @@ async function followTask() {
         if (distanceFromFollowee > FOLLOW_DISTANCE) {
             debug_log(`distanceFromFollowee: ${distanceFromFollowee}`);
             debug_log(`smart_moving to ${following.x}, ${following.y}`);
-            await smart_move(following.x, following.y);
+            await smart_move({ x: following.x, y: following.y });
         }
     }
 }
