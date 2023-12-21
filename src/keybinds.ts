@@ -2,6 +2,7 @@ import { toggleAttack, toggleFollow, toggleWaypointEditor } from "./actions";
 import { requestMagiport } from "./common/magiport";
 import { requestGold, takeAllGold } from "./common/requestGold";
 import { requestItem } from "./common/requestItem";
+import { sellAll } from "./common/selling";
 import { sendItem, sendItemViaGui } from "./util";
 import { undoLastWaypoint } from "./waypoints";
 import { startUpgradeItem, stopUpgradeItem } from "./workflows/upgradeItem";
@@ -21,6 +22,7 @@ function setupDefaultKeybinds() {
         requestGold,
         takeAllGold,
         sendItemViaGui,
+        sellAll,
     };
     map_key("A", "snippet", "parent.cmd.toggleAttack()");
     map_key("W", "snippet", "parent.cmd.toggleWaypointEditor()");
