@@ -6,21 +6,28 @@ import {
 } from "../eventHandlers";
 import { isFriend } from "../util";
 
-function autoAcceptPartyHandler(name: string) {
+function autoAcceptPartyRequest(name: string) {
+    if (isFriend(name)) {
+        accept_party_request(name);
+        log(`Received party request from ${name}, and accepted it!`);
+    }
+}
+
+function autoAcceptPartyInvite(name: string) {
     if (isFriend(name)) {
         accept_party_invite(name);
-        log(`Received party invite/request from ${name}, and accepted it!`);
+        log(`Received party invite from ${name}, and accepted it!`);
     }
 }
 
 function startPartyAutoAccepter() {
-    attachPartyInviteHandler(autoAcceptPartyHandler);
-    attachPartyRequestHandler(autoAcceptPartyHandler);
+    attachPartyInviteHandler(autoAcceptPartyInvite);
+    attachPartyRequestHandler(autoAcceptPartyRequest);
 }
 
 function stopPartyAutoAccepter() {
-    detachPartyInviteHandler(autoAcceptPartyHandler);
-    detachPartyRequestHandler(autoAcceptPartyHandler);
+    detachPartyInviteHandler(autoAcceptPartyInvite);
+    detachPartyRequestHandler(autoAcceptPartyRequest);
 }
 
 export { startPartyAutoAccepter, stopPartyAutoAccepter };
