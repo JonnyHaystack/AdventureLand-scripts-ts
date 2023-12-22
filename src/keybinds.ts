@@ -1,7 +1,7 @@
 import { toggleAttack, toggleFollow, toggleWaypointEditor } from "./actions";
 import { requestMagiport } from "./common/magiport";
 import { requestGold, takeAllGold } from "./common/requestGold";
-import { requestItem } from "./common/requestItem";
+import { requestFromNearby, requestItem } from "./common/requestItem";
 import { sellAll } from "./common/selling";
 import { sortInventory } from "./sortInventory";
 import { sendItem, sendItemViaGui } from "./util";
@@ -23,6 +23,7 @@ function setupDefaultKeybinds() {
         requestMagiport,
         sendItem,
         requestItem,
+        requestFromNearby,
         requestGold,
         takeAllGold,
         sendItemViaGui,

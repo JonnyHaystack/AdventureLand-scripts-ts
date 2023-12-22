@@ -1,11 +1,19 @@
 import { ItemKey } from "typed-adventureland";
 import { CodeMessage, CodeMessageType } from "./codeMessage";
 import { attachCodeMessageHandler, detachCodeMessageHandler } from "../eventHandlers";
-import { LOG, debug_log, isMyCharacter, sendItem } from "../util";
+import { LOG, debug_log, isMyCharacter, myNearbyCharacters, sendItem } from "../util";
 
 function requestItem(fromPlayer: string, item: ItemKey, quantity: number = 1) {
-    LOG(`Requesting ${quantity} ${item} from ${fromPlayer}`);
+    LOG(`Requesting ${quantity}x ${item} from ${fromPlayer}`);
     send_cm(fromPlayer, { type: CodeMessageType.GIVE_ITEM, args: { item, quantity } });
+}
+
+function requestFromNearby(item: ItemKey, quantity: number = 1) {
+    const nearbyCharNames = myNearbyCharacters().map((character) => character.name);
+    LOG(`Requesting ${quantity}x ${item} from all nearby characters`);
+    nearbyCharNames.forEach((name) => {
+        send_cm(name, { type: CodeMessageType.GIVE_ITEM, args: { item, quantity } });
+    });
 }
 
 function handleItemRequest(from: string, message: CodeMessage) {
@@ -30,4 +38,4 @@ function stopItemRequestHandler() {
     detachCodeMessageHandler(handleItemRequest);
 }
 
-export { requestItem, startItemRequestHandler, stopItemRequestHandler };
+export { requestItem, requestFromNearby, startItemRequestHandler, stopItemRequestHandler };
