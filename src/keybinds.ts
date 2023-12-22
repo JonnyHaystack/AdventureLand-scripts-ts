@@ -3,9 +3,10 @@ import { requestMagiport } from "./common/magiport";
 import { requestGold, takeAllGold } from "./common/requestGold";
 import { requestItem } from "./common/requestItem";
 import { sellAll } from "./common/selling";
+import { sortInventory } from "./sortInventory";
 import { sendItem, sendItemViaGui } from "./util";
 import { undoLastWaypoint } from "./waypoints";
-import { startUpgradeItem, stopUpgradeItem } from "./workflows/upgradeItem";
+import { startUpgrade, stopUpgrade } from "./workflows/upgradeItem";
 
 function setupDefaultKeybinds() {
     reset_mappings();
@@ -14,8 +15,8 @@ function setupDefaultKeybinds() {
         toggleFollow,
         toggleWaypointEditor,
         undoLastWaypoint,
-        startUpgradeItem,
-        stopUpgradeItem,
+        startUpgrade,
+        stopUpgrade,
         requestMagiport,
         sendItem,
         requestItem,
@@ -23,6 +24,7 @@ function setupDefaultKeybinds() {
         takeAllGold,
         sendItemViaGui,
         sellAll,
+        sortInventory,
     };
     map_key("A", "snippet", "parent.cmd.toggleAttack()");
     map_key("W", "snippet", "parent.cmd.toggleWaypointEditor()");
@@ -32,6 +34,8 @@ function setupDefaultKeybinds() {
     map_key("T", "snippet", "parent.cmd.requestMagiport('RobertTables')");
     map_key("G", "snippet", "parent.cmd.takeAllGold()");
     map_key("B", "snippet", "parent.cmd.sendItemViaGui()");
+    map_key("S", "snippet", "stop(); parent.cmd.stopUpgrade();");
+    map_key("E", "snippet", "parent.cmd.sortInventory();");
 }
 
 export { setupDefaultKeybinds };

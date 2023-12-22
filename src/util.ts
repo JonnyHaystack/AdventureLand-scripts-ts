@@ -59,20 +59,55 @@ function amountICanMagicRegen(): number {
     return 100;
 }
 
+function freeInventorySlots() {
+    return character.items.filter((item: ItemInfo | null) => item == null).length;
+}
+
+function itemCost(itemName: ItemKey) {
+    const itemInfo = G.items[itemName];
+    return itemInfo?.g ?? -1;
+}
+
+function inventoryQuantity(itemName: ItemKey) {
+    return character.items.reduce((quantity: number, currentItem: ItemInfo | null) => {
+        if (currentItem?.name === itemName) {
+            const stackQuantity = currentItem.q ?? 0;
+            if (stackQuantity > 1) {
+                return quantity + stackQuantity;
+            }
+            return quantity + 1;
+        }
+        return quantity;
+    }, 0);
+}
+
 function inventoryItems(itemName: ItemKey) {
     return character.items.filter((item: ItemInfo | null) => item?.name === itemName);
 }
 
-function inventoryItemsIndexed(itemName: ItemKey) {
+function inventoryItemsIndexed(itemName: ItemKey, level: number | null) {
     return character.items.reduce(
         (items: { [key: number]: ItemInfo }, currentItem: ItemInfo | null, index: number) => {
-            if (currentItem?.name === itemName) {
-                items[index] = currentItem;
+            if (currentItem?.name !== itemName) {
+                return items;
             }
+            if (level != null && currentItem?.level !== level) {
+                return items;
+            }
+            items[index] = currentItem;
             return items;
         },
         {},
     );
+}
+
+function currentHighestItemLevel(itemName: ItemKey) {
+    return character.items.reduce((highestLevel: number, currentItem: ItemInfo | null) => {
+        if (currentItem?.name === itemName) {
+            return Math.max(currentItem.level ?? 0, highestLevel);
+        }
+        return highestLevel;
+    }, 0);
 }
 
 function locateItemWithLowestLevel(itemName: ItemKey) {
@@ -132,8 +167,12 @@ export {
     isFriend,
     amountICanHeal,
     amountICanMagicRegen,
+    freeInventorySlots,
+    itemCost,
+    inventoryQuantity,
     inventoryItems,
     inventoryItemsIndexed,
+    currentHighestItemLevel,
     locateItemWithLowestLevel,
     sendItem,
     sendItemViaGui,

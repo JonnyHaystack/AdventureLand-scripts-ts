@@ -1,36 +1,13 @@
-import { ItemInfo, ItemKey } from "typed-adventureland";
-import { LOG, debug_log, locateItemWithLowestLevel } from "../util";
-
-function inventoryQuantity(itemName: ItemKey) {
-    return character.items.reduce((quantity: number, currentItem: ItemInfo | null) => {
-        if (currentItem?.name === itemName) {
-            const stackQuantity = currentItem.q ?? 0;
-            if (stackQuantity > 1) {
-                return quantity + stackQuantity;
-            }
-            return quantity + 1;
-        }
-        return quantity;
-    }, 0);
-}
-
-function currentHighestItemLevel(itemName: ItemKey) {
-    return character.items.reduce((highestLevel: number, currentItem: ItemInfo | null) => {
-        if (currentItem?.name === itemName) {
-            return Math.max(currentItem.level ?? 0, highestLevel);
-        }
-        return highestLevel;
-    }, 0);
-}
-
-function freeInventorySlots() {
-    return character.items.filter((item: ItemInfo | null) => item == null).length;
-}
-
-function itemCost(itemName: ItemKey) {
-    const itemInfo = G.items[itemName];
-    return itemInfo?.g ?? -1;
-}
+import { ItemKey } from "typed-adventureland";
+import {
+    LOG,
+    currentHighestItemLevel,
+    debug_log,
+    freeInventorySlots,
+    inventoryQuantity,
+    itemCost,
+    locateItemWithLowestLevel,
+} from "../util";
 
 function maxPurchaseQuantityWithinBudget(
     itemName: ItemKey,
@@ -66,12 +43,7 @@ let upgradeTargetLevel: number;
 let upgradeBudget: number;
 let totalSpent: number;
 
-function startUpgradeItem(
-    itemName: ItemKey,
-    scrollName: ItemKey,
-    targetLevel: number,
-    budget: number,
-) {
+function startUpgrade(itemName: ItemKey, scrollName: ItemKey, targetLevel: number, budget: number) {
     if (upgrading) {
         log(`We are already upgrading ${itemToUpgrade} to level ${upgradeTargetLevel}`);
         return;
@@ -90,7 +62,7 @@ function startUpgradeItem(
     totalSpent = 0;
 }
 
-function stopUpgradeItem() {
+function stopUpgrade() {
     if (!upgrading) {
         return;
     }
@@ -118,7 +90,7 @@ async function upgradeItemTask() {
     // Stop automatically once desired level attained.
     if (currentHighestItemLevel(itemToUpgrade) >= upgradeTargetLevel) {
         log(`We got ourselves a level ${upgradeTargetLevel} ${itemToUpgrade}!`);
-        stopUpgradeItem();
+        stopUpgrade();
         return;
     }
 
@@ -166,12 +138,12 @@ async function upgradeItemTask() {
             log(
                 `Refill cost (${refillCost}) is higher than remaining budget (${remainingBudget})!`,
             );
-            stopUpgradeItem();
+            stopUpgrade();
             return;
         }
         if (refillCost > character.gold) {
             log(`Refill cost ${refillCost} is greater than current gold ${character.gold}`);
-            stopUpgradeItem();
+            stopUpgrade();
             return;
         }
 
@@ -203,4 +175,4 @@ async function upgradeItemTask() {
     await sleep(250);
 }
 
-export { startUpgradeItem, stopUpgradeItem, upgradeItemTask };
+export { startUpgrade, stopUpgrade, upgradeItemTask };
