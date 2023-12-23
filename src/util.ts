@@ -125,13 +125,33 @@ function locateItemWithLowestLevel(itemName: ItemKey) {
     return lowestLevelItemIndex;
 }
 
-function sendItem(to: string, item: ItemKey, quantity: number = 1) {
-    const inventoryPosition = locate_item(item);
+async function sendItem(to: string, item: ItemKey, quantity: number = 1) {
+    let inventoryPosition = locate_item(item);
     if (inventoryPosition < 0) {
         LOG(`Item ${item} not found in inventory!`);
         return;
     }
-    send_item(to, inventoryPosition, quantity);
+    // If item is stackable, just send requested quantity.
+    if (character.items[inventoryPosition].q) {
+        await send_item(to, inventoryPosition, quantity);
+        return;
+    }
+    // Otherwise, loop through inventory and try to send the total requested quantity.
+    let totalSent = 0;
+    while (inventoryPosition !== -1 && totalSent < quantity) {
+        await send_item(to, inventoryPosition);
+        totalSent++;
+        inventoryPosition = locate_item(item);
+    }
+}
+
+async function sendAllItems(to: string) {
+    for (let i = 0; i < character.isize; i++) {
+        if (character.items[i] == null) {
+            continue;
+        }
+        await send_item(to, i, 9999);
+    }
 }
 
 function sendItemViaGui(quantity: number = 1000) {
@@ -175,5 +195,6 @@ export {
     currentHighestItemLevel,
     locateItemWithLowestLevel,
     sendItem,
+    sendAllItems,
     sendItemViaGui,
 };
