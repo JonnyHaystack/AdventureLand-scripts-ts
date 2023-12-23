@@ -3,7 +3,7 @@ import { requestMagiport } from "./common/magiport";
 import { requestGold, takeAllGold } from "./common/requestGold";
 import { requestFromNearby, requestItem } from "./common/requestItem";
 import { sellAll } from "./common/selling";
-import { sortInventory } from "./sortInventory";
+import { sortBankItems, sortInventory } from "./sortInventory";
 import { sendItem, sendItemViaGui } from "./util";
 import { undoLastWaypoint } from "./waypoints";
 import { startCompound, stopCompound } from "./workflows/compoundItems";
@@ -29,6 +29,7 @@ function setupDefaultKeybinds() {
         sendItemViaGui,
         sellAll,
         sortInventory,
+        sortBankItems,
     };
     map_key("A", "snippet", "parent.cmd.toggleAttack()");
     map_key("W", "snippet", "parent.cmd.toggleWaypointEditor()");
@@ -39,7 +40,7 @@ function setupDefaultKeybinds() {
     map_key("G", "snippet", "parent.cmd.takeAllGold()");
     map_key("B", "snippet", "parent.cmd.sendItemViaGui()");
     map_key("S", "snippet", "stop(); parent.cmd.stopUpgrade(); parent.cmd.stopCompound();");
-    map_key("E", "snippet", "parent.cmd.sortInventory();");
+    map_key("E", "snippet", "parent.cmd.sortInventory(); parent.cmd.sortBankItems();");
 }
 
 export { setupDefaultKeybinds };

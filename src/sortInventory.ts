@@ -1,7 +1,7 @@
 import { ItemInfo } from "typed-adventureland";
 import { LOG, debug_log } from "./util";
 
-function compareItems(item1: ItemInfo, item2: ItemInfo) {
+function compareItems(item1: ItemInfo | null, item2: ItemInfo | null) {
     if (item1 == null && item2 == null) {
         return 0;
     }
@@ -40,4 +40,32 @@ async function sortInventory() {
     LOG("Inventory sorted!");
 }
 
-export { sortInventory };
+async function sortBankItems() {
+    if (character?.bank == null) {
+        debug_log("No bank slots accessible - not sorting");
+        return;
+    }
+    Object.entries(character?.bank ?? {}).forEach(async ([packName, pack]) => {
+        if (packName === "gold" || pack == null) {
+            return;
+        }
+        pack = pack as ItemInfo[];
+        for (let i = 0; i < pack?.length; i++) {
+            let swapped = false;
+            for (let j = 0; j < pack.length - i - 1; j++) {
+                const item1 = character.bank[packName][j];
+                const item2 = character.bank[packName][j + 1];
+                if (compareItems(item1, item2) > 0) {
+                    await bank_swap(packName, j, j + 1);
+                    swapped = true;
+                }
+            }
+            if (!swapped) {
+                break;
+            }
+        }
+    });
+    LOG("Bank items sorted!");
+}
+
+export { sortInventory, sortBankItems };
