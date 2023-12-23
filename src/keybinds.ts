@@ -1,7 +1,12 @@
 import { toggleAttack, toggleFollow, toggleWaypointEditor } from "./actions";
 import { requestMagiport } from "./common/magiport";
 import { requestGold, takeAllGold } from "./common/requestGold";
-import { requestFromNearby, requestItem } from "./common/requestItem";
+import {
+    requestAll,
+    requestAllFromNearby,
+    requestFromNearby,
+    requestItem,
+} from "./common/requestItem";
 import { sellAll } from "./common/selling";
 import { sortBankItems, sortInventory } from "./sortInventory";
 import { sendItem, sendItemViaGui } from "./util";
@@ -24,6 +29,8 @@ function setupDefaultKeybinds() {
         sendItem,
         requestItem,
         requestFromNearby,
+        requestAll,
+        requestAllFromNearby,
         requestGold,
         takeAllGold,
         sendItemViaGui,
@@ -38,6 +45,7 @@ function setupDefaultKeybinds() {
     map_key("F", "snippet", "parent.cmd.toggleFollow()");
     map_key("T", "snippet", "parent.cmd.requestMagiport('RobertTables')");
     map_key("G", "snippet", "parent.cmd.takeAllGold()");
+    map_key("C", "snippet", "parent.cmd.requestAllFromNearby()");
     map_key("B", "snippet", "parent.cmd.sendItemViaGui()");
     map_key("S", "snippet", "stop(); parent.cmd.stopUpgrade(); parent.cmd.stopCompound();");
     map_key("E", "snippet", "parent.cmd.sortInventory(); parent.cmd.sortBankItems();");
