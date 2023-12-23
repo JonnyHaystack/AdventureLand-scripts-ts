@@ -1,5 +1,5 @@
 import { ItemInfo, ItemKey } from "typed-adventureland";
-import { DEBUG, FRIENDS_LIST } from "./constants";
+import { DEBUG, FRIENDS_LIST, SEND_ALL_ITEMS_EXCLUDE } from "./constants";
 import { Vector } from "./types";
 
 function debug_log(message: string) {
@@ -145,9 +145,12 @@ async function sendItem(to: string, item: ItemKey, quantity: number = 1) {
     }
 }
 
-async function sendAllItems(to: string) {
-    for (let i = 0; i < character.isize; i++) {
-        if (character.items[i] == null) {
+async function sendAllItems(to: string, endIndex: number = character.isize) {
+    for (let i = 0; i < endIndex; i++) {
+        if (
+            character.items[i] == null ||
+            SEND_ALL_ITEMS_EXCLUDE.includes(character.items[i].name)
+        ) {
             continue;
         }
         await send_item(to, i, 9999);
