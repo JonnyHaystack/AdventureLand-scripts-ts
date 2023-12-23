@@ -1,7 +1,12 @@
-import { ItemInfo } from "typed-adventureland";
 import { LOG, debug_log } from "./util";
 
-function compareItems(item1: ItemInfo | null, item2: ItemInfo | null) {
+type ItemInfoWithIndex = {
+    name?: string;
+    level?: number;
+    index: number;
+};
+
+function compareItems(item1: ItemInfoWithIndex | null, item2: ItemInfoWithIndex | null) {
     if (item1 == null && item2 == null) {
         return 0;
     }
@@ -12,7 +17,6 @@ function compareItems(item1: ItemInfo | null, item2: ItemInfo | null) {
         return -1;
     }
     const nameComparisonResult = item1.name.localeCompare(item2.name);
-    debug_log(`Comparing ${item1.name} with ${item2.name}, result is ${nameComparisonResult}`);
     if (nameComparisonResult != 0) {
         return nameComparisonResult;
     }
@@ -23,19 +27,34 @@ function compareItems(item1: ItemInfo | null, item2: ItemInfo | null) {
 
 async function sortInventory() {
     const slotsToSort = character.isize - 4;
-    for (let i = 0; i < slotsToSort; i++) {
-        let swapped = false;
-        for (let j = 0; j < slotsToSort - i - 1; j++) {
-            const item1 = character.items[j];
-            const item2 = character.items[j + 1];
-            if (compareItems(item1, item2) > 0) {
-                await swap(j, j + 1);
-                swapped = true;
-            }
+    const sortedItems = character.items.slice(0, slotsToSort) as ItemInfoWithIndex[];
+    sortedItems.forEach((item, index, array) => {
+        if (item == null) {
+            array[index] = { index };
+            return;
         }
-        if (!swapped) {
-            break;
+        item.index = index;
+    });
+    sortedItems.sort(compareItems);
+    for (let sortedArrayIndex = 0; sortedArrayIndex < sortedItems.length; sortedArrayIndex++) {
+        const item = sortedItems[sortedArrayIndex];
+        if (item == null || item.index === sortedArrayIndex) {
+            continue;
         }
+        // debug_log(
+        //     `Swapping ${item.index}:${JSON.stringify(
+        //         character.items[item.index],
+        //     )} with ${sortedArrayIndex}:${JSON.stringify(character.items[sortedArrayIndex])}`,
+        // );
+        await swap(sortedArrayIndex, item.index);
+
+        // Update index pointer of the item we just swapped with the current item, so we still know
+        // where it's actual position in the inventory is.
+        const swappedItem = sortedItems.find((item) => item.index === sortedArrayIndex);
+        if (swappedItem != null) {
+            swappedItem.index = item.index;
+        }
+        item.index = sortedArrayIndex;
     }
     LOG("Inventory sorted!");
 }
@@ -49,20 +68,34 @@ async function sortBankItems() {
         if (packName === "gold" || pack == null) {
             return;
         }
-        pack = pack as ItemInfo[];
-        for (let i = 0; i < pack?.length; i++) {
-            let swapped = false;
-            for (let j = 0; j < pack.length - i - 1; j++) {
-                const item1 = character.bank[packName][j];
-                const item2 = character.bank[packName][j + 1];
-                if (compareItems(item1, item2) > 0) {
-                    await bank_swap(packName, j, j + 1);
-                    swapped = true;
-                }
+        const sortedItems = (pack as ItemInfoWithIndex[]).slice();
+        sortedItems.forEach((item, index) => {
+            if (item == null) {
+                sortedItems[index] = { index };
+                return;
             }
-            if (!swapped) {
-                break;
+            item.index = index;
+        });
+        sortedItems.sort(compareItems);
+        for (let sortedArrayIndex = 0; sortedArrayIndex < sortedItems.length; sortedArrayIndex++) {
+            const item = sortedItems[sortedArrayIndex];
+            if (item == null || item.index === sortedArrayIndex) {
+                continue;
             }
+            // debug_log(
+            //     `Swapping ${item.index}:${JSON.stringify(
+            //         character.items[item.index],
+            //     )} with ${sortedArrayIndex}:${JSON.stringify(character.items[sortedArrayIndex])}`,
+            // );
+            await bank_swap(packName, sortedArrayIndex, item.index);
+
+            // Update index pointer of the item we just swapped with the current item, so we still know
+            // where it's actual position in the inventory is.
+            const swappedItem = sortedItems.find((item) => item.index === sortedArrayIndex);
+            if (swappedItem != null) {
+                swappedItem.index = item.index;
+            }
+            item.index = sortedArrayIndex;
         }
     });
     LOG("Bank items sorted!");
