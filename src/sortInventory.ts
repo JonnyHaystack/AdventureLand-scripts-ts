@@ -25,37 +25,39 @@ function compareItems(item1: ItemInfoWithIndex | null, item2: ItemInfoWithIndex 
     return item1Level - item2Level;
 }
 
-async function sortInventory() {
-    const slotsToSort = character.isize - 4;
-    const sortedItems = character.items.slice(0, slotsToSort) as ItemInfoWithIndex[];
-    sortedItems.forEach((item, index, array) => {
+async function sortItemPack(
+    items: ItemInfoWithIndex[],
+    swapFunction: (destSlot: number, slot: number) => Promise<unknown>,
+) {
+    items.forEach((item, index, array) => {
         if (item == null) {
             array[index] = { index };
             return;
         }
         item.index = index;
     });
-    sortedItems.sort(compareItems);
-    for (let sortedArrayIndex = 0; sortedArrayIndex < sortedItems.length; sortedArrayIndex++) {
-        const item = sortedItems[sortedArrayIndex];
+    items.sort(compareItems);
+    for (let sortedArrayIndex = 0; sortedArrayIndex < items.length; sortedArrayIndex++) {
+        const item = items[sortedArrayIndex];
         if (item == null || item.index === sortedArrayIndex) {
             continue;
         }
-        // debug_log(
-        //     `Swapping ${item.index}:${JSON.stringify(
-        //         character.items[item.index],
-        //     )} with ${sortedArrayIndex}:${JSON.stringify(character.items[sortedArrayIndex])}`,
-        // );
-        await swap(sortedArrayIndex, item.index);
+        await swapFunction(sortedArrayIndex, item.index);
 
         // Update index pointer of the item we just swapped with the current item, so we still know
         // where it's actual position in the inventory is.
-        const swappedItem = sortedItems.find((item) => item.index === sortedArrayIndex);
+        const swappedItem = items.find((item) => item.index === sortedArrayIndex);
         if (swappedItem != null) {
             swappedItem.index = item.index;
         }
         item.index = sortedArrayIndex;
     }
+}
+
+async function sortInventory() {
+    const slotsToSort = character.isize - 4;
+    const itemsCopy = character.items.slice(0, slotsToSort) as ItemInfoWithIndex[];
+    sortItemPack(itemsCopy, async (destSlot, slot) => await swap(destSlot, slot));
     LOG("Inventory sorted!");
 }
 
@@ -68,35 +70,11 @@ async function sortBankItems() {
         if (packName === "gold" || pack == null) {
             return;
         }
-        const sortedItems = (pack as ItemInfoWithIndex[]).slice();
-        sortedItems.forEach((item, index) => {
-            if (item == null) {
-                sortedItems[index] = { index };
-                return;
-            }
-            item.index = index;
-        });
-        sortedItems.sort(compareItems);
-        for (let sortedArrayIndex = 0; sortedArrayIndex < sortedItems.length; sortedArrayIndex++) {
-            const item = sortedItems[sortedArrayIndex];
-            if (item == null || item.index === sortedArrayIndex) {
-                continue;
-            }
-            // debug_log(
-            //     `Swapping ${item.index}:${JSON.stringify(
-            //         character.items[item.index],
-            //     )} with ${sortedArrayIndex}:${JSON.stringify(character.items[sortedArrayIndex])}`,
-            // );
-            await bank_swap(packName, sortedArrayIndex, item.index);
-
-            // Update index pointer of the item we just swapped with the current item, so we still know
-            // where it's actual position in the inventory is.
-            const swappedItem = sortedItems.find((item) => item.index === sortedArrayIndex);
-            if (swappedItem != null) {
-                swappedItem.index = item.index;
-            }
-            item.index = sortedArrayIndex;
-        }
+        const itemsCopy = (pack as ItemInfoWithIndex[]).slice();
+        sortItemPack(
+            itemsCopy,
+            async (destSlot, slot) => await bank_swap(packName, destSlot, slot),
+        );
     });
     LOG("Bank items sorted!");
 }
