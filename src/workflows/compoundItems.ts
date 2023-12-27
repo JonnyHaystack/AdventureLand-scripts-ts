@@ -19,9 +19,9 @@ let totalSpent: number;
 
 function startCompound(
     itemName: ItemKey,
-    scrollName: ItemKey,
     targetLevel: number,
-    budget: number,
+    scrollName: ItemKey = "cscroll0",
+    budget: number = 0,
 ) {
     if (compounding) {
         log(`We are already compounding ${itemToCompound} to level ${compoundTargetLevel}`);

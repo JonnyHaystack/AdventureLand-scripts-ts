@@ -43,7 +43,12 @@ let upgradeTargetLevel: number;
 let upgradeBudget: number;
 let totalSpent: number;
 
-function startUpgrade(itemName: ItemKey, scrollName: ItemKey, targetLevel: number, budget: number) {
+function startUpgrade(
+    itemName: ItemKey,
+    targetLevel: number,
+    scrollName: ItemKey = "scroll0",
+    budget: number = 0,
+) {
     if (upgrading) {
         log(`We are already upgrading ${itemToUpgrade} to level ${upgradeTargetLevel}`);
         return;
@@ -171,7 +176,7 @@ async function upgradeItemTask() {
 
     debug_log("Performing upgrade...");
     const upgradeResult = await upgrade(itemIndex, scrollIndex);
-    debug_log(`Upgrade result: ${upgradeResult}`);
+    debug_log(`Upgrade result: ${JSON.stringify(upgradeResult)}`);
     await sleep(250);
 }
 
