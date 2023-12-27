@@ -1,8 +1,9 @@
 const DEBUG = true;
 const MY_PLAYER_ID = "4795072004751360";
-const FRIENDS_LIST = ["Dengar", "Gengar", "Cadet", "Shelfy", "Kata", "Kano"];
+const FRIENDS_LIST = ["Dengar", "Gengar", "Cadet", "Shelfy", "Kata", "Kano", "Cora"];
 const TARGET_ENEMY_MIN_XP = 100;
-const TARGET_ENEMY_MAX_ATK = 30;
+const TARGET_ENEMY_MAX_ATK = 64;
+const TARGET_ENEMY_MAX_DAMAGE_RETURN_PERCENT = 5;
 const SEND_ALL_ITEMS_EXCLUDE = ["hpot0", "mpot0"];
 
 export {
@@ -11,5 +12,6 @@ export {
     FRIENDS_LIST,
     TARGET_ENEMY_MIN_XP,
     TARGET_ENEMY_MAX_ATK,
+    TARGET_ENEMY_MAX_DAMAGE_RETURN_PERCENT,
     SEND_ALL_ITEMS_EXCLUDE,
 };
