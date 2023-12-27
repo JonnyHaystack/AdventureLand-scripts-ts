@@ -21,8 +21,9 @@ function toggleAttack() {
 
 function toggleFollow() {
     const following = getState(StateKey.FOLLOWING);
-    if (following == null) {
-        startFollowing(get_target());
+    if (following == null && character.focus != null) {
+        startFollowing(parent.entities[character.focus]);
+        // startFollowing(get_target());
     } else {
         stopFollowing();
     }
@@ -93,58 +94,4 @@ function regenStuff() {
     });
 }
 
-async function rangedAttackBasic() {
-    let target = get_targeted_monster();
-    if (!target) {
-        debug_log("Searching for nearest monster");
-        target = get_nearest_monster({
-            min_xp: TARGET_ENEMY_MIN_XP,
-            max_att: TARGET_ENEMY_MAX_ATK,
-        });
-
-        if (target) {
-            debug_log(`Target acquired: ${target.name}`);
-            change_target(target);
-        } else {
-            debug_log("No monsters found");
-            set_message("No Monsters");
-            return;
-        }
-    }
-
-    if (!is_in_range(target)) {
-        // Walk some of the distance.
-        const distanceStepFactor = 0.1;
-        debug_log(`Out of range, walking ${distanceStepFactor * 100}% of the distance to target`);
-        move(
-            character.x + (target.x - character.x) * distanceStepFactor,
-            character.y + (target.y - character.y) * distanceStepFactor,
-        );
-        return;
-    }
-    const distanceToTarget = simple_distance(
-        { x: character.x, y: character.y },
-        { x: target.x, y: target.y },
-    );
-
-    if (can_attack(target) && !is_on_cooldown("attack")) {
-        set_message("Attacking");
-        attack(target);
-    }
-
-    const idealDistance = Math.min(character.range * 0.9, target.range + 20);
-    if (distanceToTarget < idealDistance) {
-        debug_log(`distanceToTarget=${Math.round(distanceToTarget)}`);
-        debug_log(
-            `Vector: ${Math.round(character.x - target.x)}, ${Math.round(character.y - target.y)}`,
-        );
-        const idealDistanceMult = idealDistance / distanceToTarget;
-        debug_log(`idealDistanceMult=${idealDistanceMult.toFixed(3)}`);
-        await move(
-            character.x + (character.x - target.x) * idealDistanceMult,
-            character.y + (character.y - target.y) * idealDistanceMult,
-        );
-    }
-}
-
-export { runAway, toggleAttack, toggleFollow, toggleWaypointEditor, regenStuff, rangedAttackBasic };
+export { runAway, toggleAttack, toggleFollow, toggleWaypointEditor, regenStuff };
