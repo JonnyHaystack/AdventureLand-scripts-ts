@@ -1,4 +1,5 @@
-import { rangedAttackBasic, regenStuff } from "./actions";
+import { regenStuff } from "./actions";
+import { rangedAttackBasic } from "./combat";
 import { followTask } from "./common/follow";
 import { StateKey, getState } from "./state";
 import { compoundItemsTask } from "./workflows/compoundItems";

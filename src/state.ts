@@ -3,6 +3,7 @@ enum StateKey {
     WAYPOINT_MODE = "waypointMode",
     WAYPOINTS = "waypoints",
     FOLLOWING = "following",
+    AUTO_SERVER_CYCLE = "autoServerCycle",
 }
 
 type State = Record<StateKey, any>;
@@ -12,11 +13,15 @@ const defaultState: State = {
     [StateKey.WAYPOINT_MODE]: false,
     [StateKey.WAYPOINTS]: [],
     [StateKey.FOLLOWING]: null,
+    [StateKey.AUTO_SERVER_CYCLE]: false,
 };
 
 let state: State;
 
 function getState(key: StateKey) {
+    if (!state) {
+        state = get(character.id);
+    }
     if (!state) {
         state = defaultState;
     }
@@ -28,6 +33,7 @@ function setState(key: StateKey, value: any) {
         state = defaultState;
     }
     state[key] = value;
+    set(character.id, state);
 }
 
 export { StateKey, getState, setState };
