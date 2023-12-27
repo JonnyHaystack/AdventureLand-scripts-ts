@@ -50,7 +50,7 @@ function requestAllItemsHandler(from: string, message: CodeMessage) {
         return;
     }
     debug_log(`Sending all items to ${from}`);
-    sendAllItems(from);
+    sendAllItems(from, character.isize - 2);
 }
 
 function startItemRequestHandler() {
