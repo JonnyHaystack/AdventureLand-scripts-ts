@@ -37,7 +37,7 @@ function amountICanHeal(): number {
     for (const item of character.items) {
         if (item == null) continue;
         const givesArray: any[] = G.items[item.name]?.gives ?? [];
-        for (const gives in givesArray) {
+        for (const gives of givesArray) {
             if (gives.includes("hp") && gives.length > 1) {
                 return parseInt(gives[1], 10);
             }
@@ -50,8 +50,11 @@ function amountICanMagicRegen(): number {
     for (const item of character.items) {
         if (item == null) continue;
         const givesArray: any[] = G.items[item.name]?.gives ?? [];
-        for (const gives in givesArray) {
+        for (const gives of givesArray) {
             if (gives.includes("mp") && gives.length > 1) {
+                // debug_log(givesArray);
+                // debug_log(gives);
+                // debug_log(gives[1]);
                 return parseInt(gives[1], 10);
             }
         }

@@ -1,22 +1,28 @@
 import { startFollowing, stopFollowing } from "./common/follow";
-import { TARGET_ENEMY_MAX_ATK, TARGET_ENEMY_MIN_XP } from "./constants";
-import { StateKey, getState, setState } from "./state";
-import { amountICanHeal, amountICanMagicRegen, debug_log } from "./util";
+import { AttackMode, StateKey, getState, setState } from "./state";
+import { LOG } from "./util";
 import { startWaypointEditor, stopWaypointEditor } from "./waypoints";
 
 const safeties = true;
 // let last_potion = new Date(0);
 
-function runAway() {
+async function runAway() {
     // TODO: Improve this a lot
-    setState(StateKey.ATTACK_MODE, false);
+    setState(StateKey.ATTACK_MODE, AttackMode.INACTIVE);
     log(`Attack mode disabled - running away!`);
-    smart_move("bean");
+    await smart_move("bank");
 }
 
 function toggleAttack() {
-    setState(StateKey.ATTACK_MODE, !getState(StateKey.ATTACK_MODE));
-    log(`Attack mode ${getState(StateKey.ATTACK_MODE) ? "en" : "dis"}abled!`);
+    const attackMode = getState(StateKey.ATTACK_MODE);
+    if (attackMode == null || attackMode == false || attackMode === AttackMode.INACTIVE) {
+        setState(StateKey.ATTACK_MODE, AttackMode.FARMING_ACTIVE);
+        LOG("Combat mode enabled!");
+    } else {
+        // } else if ([AttackMode.FARMING_ACTIVE, AttackMode.FARMING_PAUSE].includes(attackMode)) {
+        setState(StateKey.ATTACK_MODE, AttackMode.INACTIVE);
+        LOG("Combat mode disabled!");
+    }
 }
 
 function toggleFollow() {
@@ -46,52 +52,4 @@ function toggleWaypointEditor() {
     log("No new waypoints to save.");
 }
 
-function regenStuff() {
-    // if (safeties && mssince(last_potion) < Math.min(200, character.ping * 3)) {
-    //     return resolving_promise({
-    //         reason: "safeties",
-    //         success: false,
-    //         used: false,
-    //     });
-    // }
-
-    // const cooldownAbilities = ["use_hp", "regen_hp", "use_mp", "regen_mp"];
-    // for (const ability of cooldownAbilities) {
-    //     if (is_on_cooldown(ability)) {
-    //         return resolving_promise({ success: false, reason: "cooldown" });
-    //     }
-    // }
-    if (is_on_cooldown("use_hp")) {
-        return resolving_promise({ success: false, reason: "cooldown" });
-    }
-
-    const healAmount = amountICanHeal();
-    if (character.max_hp - character.hp >= healAmount) {
-        debug_log("use_skill('use_hp')");
-        return use_skill("use_hp");
-    }
-    if (character.hp / character.max_hp < 0.3) {
-        debug_log("runAway()");
-        return runAway();
-        // return use_skill("use_hp");
-    }
-    // if (character.mp / character.max_mp < 0.2) {
-    //     debug_log("use_skill('use_mp')");
-    //     return use_skill("use_mp");
-    // }
-
-    const magicRegenAmount = amountICanMagicRegen();
-    if (character.max_mp - character.mp >= magicRegenAmount) {
-        debug_log(`is_on_cooldown('use_mp'): ${is_on_cooldown("use_mp")}`);
-        debug_log("use_skill('use_mp')");
-        return use_skill("use_mp");
-    }
-
-    return resolving_promise({
-        reason: "full",
-        success: false,
-        used: false,
-    });
-}
-
-export { runAway, toggleAttack, toggleFollow, toggleWaypointEditor, regenStuff };
+export { runAway, toggleAttack, toggleFollow, toggleWaypointEditor };

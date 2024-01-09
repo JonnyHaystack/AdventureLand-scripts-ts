@@ -2,23 +2,28 @@ import { MonsterEntity } from "typed-adventureland";
 import {
     TARGET_ENEMY_MAX_ATK,
     TARGET_ENEMY_MAX_DAMAGE_RETURN_PERCENT,
+    TARGET_ENEMY_MAX_EVASION,
     TARGET_ENEMY_MIN_XP,
 } from "./constants";
 import { debug_log } from "./util";
+import { AttackMode, StateKey, getState } from "./state";
 
 function findAllowedTargets() {
-    return Object.values(parent.entities).filter(
-        (entity) =>
-            entity.type === "monster" &&
-            entity.visible &&
-            !entity.dead &&
-            entity.xp >= TARGET_ENEMY_MIN_XP &&
-            entity.attack <= TARGET_ENEMY_MAX_ATK &&
-            (character.ctype !== "paladin" ||
-                entity.dreturn == null ||
-                entity.dreturn <= TARGET_ENEMY_MAX_DAMAGE_RETURN_PERCENT) &&
-            (entity?.evasion ?? 0) <= 50,
-    );
+    return Object.values(parent.entities).filter((entity) => {
+        if (entity.type !== "monster") return false;
+        if (entity.dead || !entity.visible) return false;
+        if (entity.xp < TARGET_ENEMY_MIN_XP) return false;
+        if (entity.attack > TARGET_ENEMY_MAX_ATK) return false;
+        if ((entity.evasion ?? 0) > TARGET_ENEMY_MAX_EVASION) return false;
+
+        if (character.ctype === "paladin") {
+            if ((entity.dreturn ?? 0) > TARGET_ENEMY_MAX_DAMAGE_RETURN_PERCENT) return false;
+        }
+
+        if (entity.immune) return false;
+
+        return true;
+    });
 }
 
 function findNearestMonster() {
@@ -35,10 +40,16 @@ function findNearestMonster() {
 
 function updateTarget() {
     let target = get_targeted_monster();
+
+    // Stick with current target if it is already targeting us.
     if (target != null && (target?.target ?? null) === character.id) {
         return target;
     }
 
+    // If no target and combat is not active, do not seek new target.
+    if (target == null && getState(StateKey.ATTACK_MODE) !== AttackMode.FARMING_ACTIVE) {
+        return target;
+    }
     debug_log("Searching for nearest monster");
     target = findNearestMonster();
 
@@ -69,7 +80,7 @@ async function reposition(target: MonsterEntity) {
         { x: target.x, y: target.y },
     );
 
-    const idealDistance = Math.min(character.range * 0.9, target.range + 20);
+    const idealDistance = Math.max(character.range * 0.9, target.range + 20);
     if (distanceToTarget < idealDistance) {
         debug_log(`distanceToTarget=${Math.round(distanceToTarget)}`);
         debug_log(
@@ -77,10 +88,14 @@ async function reposition(target: MonsterEntity) {
         );
         const idealDistanceMult = idealDistance / distanceToTarget;
         debug_log(`idealDistanceMult=${idealDistanceMult.toFixed(3)}`);
-        await xmove(
+        await move(
             character.x + (character.x - target.x) * idealDistanceMult,
             character.y + (character.y - target.y) * idealDistanceMult,
         );
+        // await xmove(
+        //     character.x + (character.x - target.x) * idealDistanceMult,
+        //     character.y + (character.y - target.y) * idealDistanceMult,
+        // );
     }
 }
 

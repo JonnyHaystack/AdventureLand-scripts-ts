@@ -6,10 +6,16 @@ enum StateKey {
     AUTO_SERVER_CYCLE = "autoServerCycle",
 }
 
+enum AttackMode {
+    INACTIVE,
+    FARMING_ACTIVE,
+    FARMING_PAUSE,
+}
+
 type State = Record<StateKey, any>;
 
 const defaultState: State = {
-    [StateKey.ATTACK_MODE]: false,
+    [StateKey.ATTACK_MODE]: AttackMode.INACTIVE,
     [StateKey.WAYPOINT_MODE]: false,
     [StateKey.WAYPOINTS]: [],
     [StateKey.FOLLOWING]: null,
@@ -36,4 +42,4 @@ function setState(key: StateKey, value: any) {
     set(character.id, state);
 }
 
-export { StateKey, getState, setState };
+export { StateKey, AttackMode, getState, setState };
