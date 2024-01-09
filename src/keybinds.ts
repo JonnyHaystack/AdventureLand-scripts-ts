@@ -11,6 +11,7 @@ import {
 import { sellAll } from "./common/selling";
 import { startPontyScraper, stopPontyScraper } from "./pontyScraper";
 import { sortBankItems, sortInventory } from "./sortInventory";
+import { getState, setState } from "./state";
 import { sendItem, sendItemViaGui } from "./util";
 import { undoLastWaypoint } from "./waypoints";
 import { startCompound, stopCompound } from "./workflows/compoundItems";
@@ -19,6 +20,8 @@ import { startUpgrade, stopUpgrade } from "./workflows/upgradeItem";
 function setupDefaultKeybinds() {
     reset_mappings();
     (parent as any).cmd = {
+        getState,
+        setState,
         toggleAttack,
         toggleFollow,
         toggleWaypointEditor,
