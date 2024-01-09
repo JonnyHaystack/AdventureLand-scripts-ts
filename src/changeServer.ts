@@ -11,7 +11,7 @@ function currentServer() {
 }
 
 function switchToNextServer() {
-    const servers = parent.X.servers;
+    const servers = parent.X.servers.filter((server) => server.name !== "PVP");
     const myCurrentServer = currentServer();
     const currentServerIndex = servers.findIndex(
         ({ region, name }) => region === myCurrentServer.region && name === myCurrentServer.name,
@@ -21,15 +21,22 @@ function switchToNextServer() {
     change_server(nextServer.region as ServerRegion, nextServer.name as ServerIdentifier);
 }
 
-let serverCycleTimer: NodeJS.Timeout;
+let serverCycleTimer: NodeJS.Timeout | null = null;
 
 function startServerCycleTimer() {
+    if (serverCycleTimer != null) {
+        LOG("Auto server cycler already running");
+        return;
+    }
     LOG("Switching server in 60 seconds!");
     serverCycleTimer = setTimeout(switchToNextServer, 60_000);
 }
 
 function stopServerCycleTimer() {
-    clearTimeout(serverCycleTimer);
+    if (serverCycleTimer != null) {
+        clearTimeout(serverCycleTimer);
+        serverCycleTimer = null;
+    }
 }
 
 function startAutoServerCycle() {
